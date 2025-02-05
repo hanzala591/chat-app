@@ -1,5 +1,6 @@
 import ApiError from "../lib/ApiError.js";
 import asyncHandler from "../lib/asyncHandler.js";
+import { generateToken } from "../lib/Tokens.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 export const signup = asyncHandler(async (req, res) => {
@@ -14,12 +15,15 @@ export const signup = asyncHandler(async (req, res) => {
   if (findUser) {
     throw new ApiError(400, "User is Already Existed");
   }
-  const cryptedPassword = bcrypt.hashSync(password, process.env.SALT);
-  const createdUser = await User.create({
+  const cryptedPassword = bcrypt.hashSync(password, parseInt(process.env.SALT));
+  console.log(cryptedPassword);
+  await User.create({
     email,
     fullName,
     password: cryptedPassword,
   });
+  const createdUser = await User.findOne({ email }).select("-password");
+  generateToken(createdUser._id);
   return res.json(createdUser);
 });
 export const login = (req, res) => {};
