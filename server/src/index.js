@@ -1,8 +1,16 @@
 import express from "express";
+import dotenv from "dotenv";
 import authRouter from "./routes/auth.route.js";
-const app = express();
+import connectionDB from "./lib/connectionDB.js";
 
-app.use("/api", authRouter);
-app.listen(5000, () => {
-  console.log("App is listening at port 5000");
+dotenv.config();
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded());
+app.use("/api/auth", authRouter);
+connectionDB().then(() => {
+  console.log("MongoDb is Connected");
+  app.listen(process.env.PORT || 8000, () => {
+    console.log("App is Listening at Port 5000");
+  });
 });
