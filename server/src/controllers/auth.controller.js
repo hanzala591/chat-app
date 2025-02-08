@@ -1,7 +1,7 @@
 import ApiError from "../lib/ApiError.js";
 import ApiResponse from "../lib/ApiResponse.js";
 import asyncHandler from "../lib/asyncHandler.js";
-import { generateToken, loggedUser } from "../lib/Tokens.js";
+import { generateToken } from "../lib/Tokens.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 export const signup = asyncHandler(async (req, res) => {
@@ -60,6 +60,8 @@ export const login = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, token));
 });
 export const logout = asyncHandler((req, res) => {
-  const user = loggedUser(req.cookies.auth);
-  return res.status(200).clearCookie("auth").json(new ApiResponse(200, user));
+  return res
+    .status(200)
+    .clearCookie("auth")
+    .json(new ApiResponse(200, req.user));
 });
