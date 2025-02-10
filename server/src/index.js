@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());
+app.use(express.static("public"));
 app.use("/api/auth", authRouter);
 connectionDB().then(() => {
   console.log("MongoDb is Connected");

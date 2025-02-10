@@ -3,7 +3,6 @@ import User from "../models/user.model.js";
 export const generateToken = async (id) => {
   try {
     const user = await User.findById(id).select("-password");
-    console.log(jwt);
     return jwt.sign(
       {
         _id: user._id,
