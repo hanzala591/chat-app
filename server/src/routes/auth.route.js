@@ -4,6 +4,7 @@ import {
   login,
   logout,
   updateProfilePic,
+  updateSignup,
 } from "../controllers/auth.controller.js";
 import { loggedUser } from "../middlewares/loggedUser.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -19,4 +20,5 @@ authRouter.post(
   upload.single("profilePic"),
   updateProfilePic
 );
+authRouter.post("/updateSignup", loggedUser, updateSignup);
 export default authRouter;

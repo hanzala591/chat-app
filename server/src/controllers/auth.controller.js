@@ -107,4 +107,32 @@ export const updateProfilePic = asyncHandler(async (req, res) => {
   }
 });
 
-export const updatePassword = asyncHandler((req, res) => {});
+export const updateSignup = asyncHandler(async (req, res) => {
+  const { email, fullName, password } = req.body;
+  const userEmail = req.user.email;
+  const findedUser = await User.findOne({ email: userEmail });
+  if (email) {
+    findedUser.email = email;
+  }
+  if (fullName) {
+    findedUser.fullName = fullName;
+  }
+  if (password) {
+    const hashedPassword = await bcrypt.hash(
+      password,
+      parseInt(process.env.SALT)
+    );
+    findedUser.password = hashedPassword;
+  }
+  await findedUser.save();
+  return res
+    .status(200)
+    .clearCookie("auth")
+    .json(
+      new ApiResponse(200, {
+        _id: findedUser._id,
+        email: findedUser.email,
+        fullName: findedUser.fullName,
+      })
+    );
+});
