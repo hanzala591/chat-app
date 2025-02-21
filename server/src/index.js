@@ -4,9 +4,16 @@ import authRouter from "./routes/auth.route.js";
 import connectionDB from "./lib/connectionDB.js";
 import cookieParser from "cookie-parser";
 import messageRoute from "./routes/message.route.js";
+import cors from "cors";
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(express.static("public"));

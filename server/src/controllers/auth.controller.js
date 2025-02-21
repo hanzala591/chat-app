@@ -9,48 +9,42 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
 export const signup = asyncHandler(async (req, res) => {
-  try {
-    const { email, fullName, password } = req.body;
-    if ([email, fullName, password].every((v, i) => v.length !== 0)) {
-    } else {
-      throw new ApiError(400, "One Field is Empty");
-    }
-    const findUser = await User.findOne({ email });
-    if (findUser) {
-      throw new ApiError(400, "User is Already Existed");
-    }
-    const cryptedPassword = bcrypt.hashSync(
-      password,
-      parseInt(process.env.SALT)
-    );
-    const uploadedCloudinary = await uploadFileOnCloudinary(req.file.path);
-    if (!uploadedCloudinary) {
-      throw new ApiError(400, "Image is not uploaded on Cloudinary");
-    }
-    const user = await User.create({
-      email,
-      fullName,
-      password: cryptedPassword,
-      profilePic: uploadedCloudinary.secure_url,
-    });
-    if (!user) {
-      throw new ApiError(500, "User is not Created In DB");
-    }
-    const createdUser = await User.findOne({ email }).select("-password");
-    const token = await generateToken(createdUser._id);
-    fs.unlinkSync(req.file.path);
-    return res
-      .status(200)
-      .cookie("auth", token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: true,
-      })
-      .json(new ApiResponse(200, token));
-  } catch (error) {
-    fs.unlinkSync(req.file.path);
-    throw new ApiError(400, error);
+  const { email, fullName, password } = req.body;
+  if ([email, fullName, password].every((v, i) => v.length !== 0)) {
+  } else {
+    throw new ApiError(400, "One Field is Empty");
   }
+  const findUser = await User.findOne({ email });
+  if (findUser) {
+    throw new ApiError(400, "User is Already Existed");
+  }
+  const cryptedPassword = bcrypt.hashSync(password, parseInt(process.env.SALT));
+  console.log(req.file);
+  let uploadedCloudinary = "";
+  if (req.file) {
+    uploadedCloudinary = await uploadFileOnCloudinary(req.file.path);
+  }
+
+  const user = await User.create({
+    email,
+    fullName,
+    password: cryptedPassword,
+    profilePic: uploadedCloudinary.secure_url,
+  });
+  if (!user) {
+    throw new ApiError(500, "User is not Created In DB");
+  }
+  const createdUser = await User.findOne({ email }).select("-password");
+  const token = await generateToken(createdUser._id);
+  fs.unlinkSync(req.file.path);
+  return res
+    .status(200)
+    .cookie("auth", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: true,
+    })
+    .json(new ApiResponse(200, token));
 });
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -84,6 +78,12 @@ export const logout = asyncHandler((req, res) => {
     .json(new ApiResponse(200, req.user));
 });
 
+export const checkAuth = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    throw new ApiError(400, "User is not Authenticated");
+  }
+  return res.status(200).json(new ApiResponse(200, req.user));
+});
 export const updateProfilePic = asyncHandler(async (req, res) => {
   try {
     const user = req.user;
