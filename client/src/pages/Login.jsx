@@ -1,5 +1,5 @@
 import React from "react";
 
-export default function Navbar() {
-  return <div>Login</div>;
+export default function Login() {
+  return <div className="">Login</div>;
 }

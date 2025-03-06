@@ -10,41 +10,45 @@ import bcrypt from "bcryptjs";
 
 export const signup = asyncHandler(async (req, res) => {
   const { email, fullName, password } = req.body;
+
   if ([email, fullName, password].every((v, i) => v.length !== 0)) {
   } else {
     throw new ApiError(400, "One Field is Empty");
   }
+
   const findUser = await User.findOne({ email });
   if (findUser) {
     throw new ApiError(400, "User is Already Existed");
   }
+
   const cryptedPassword = bcrypt.hashSync(password, parseInt(process.env.SALT));
-  console.log(req.file);
+
   let uploadedCloudinary = "";
-  if (req.file) {
+  if (req?.file) {
     uploadedCloudinary = await uploadFileOnCloudinary(req.file.path);
   }
-
   const user = await User.create({
     email,
     fullName,
     password: cryptedPassword,
-    profilePic: uploadedCloudinary.secure_url,
+    profilePic: uploadedCloudinary?.secure_url,
   });
+
   if (!user) {
     throw new ApiError(500, "User is not Created In DB");
   }
   const createdUser = await User.findOne({ email }).select("-password");
   const token = await generateToken(createdUser._id);
-  fs.unlinkSync(req.file.path);
-  return res
-    .status(200)
-    .cookie("auth", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: true,
-    })
-    .json(new ApiResponse(200, token));
+  if (req?.file) {
+    fs.unlinkSync(req?.file?.path);
+  }
+  res.cookie("auth", token, {
+    httpOnly: true, // Recommended for security
+    secure: true, // Required for SameSite: 'None' and production
+    sameSite: "None", // or 'Lax' or 'Strict' as needed
+    path: "/",
+  });
+  return res.status(200).json(new ApiResponse(200, token));
 });
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -72,15 +76,22 @@ export const login = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, token));
 });
 export const logout = asyncHandler((req, res) => {
+  console.log("click");
   return res
     .status(200)
     .clearCookie("auth")
     .json(new ApiResponse(200, req.user));
 });
 
+export const cookieee = asyncHandler(async (req, res) => {
+  await res.cookie("done", "dne");
+  return res.send("done");
+});
+
 export const checkAuth = asyncHandler(async (req, res) => {
   if (!req.user) {
-    throw new ApiError(400, "User is not Authenticated");
+    return res.status(400).json(new ApiError(400, "User is not Authenticated"));
+    // throw new ApiError(400, "User is not Authenticated");
   }
   return res.status(200).json(new ApiResponse(200, req.user));
 });
