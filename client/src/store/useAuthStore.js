@@ -4,13 +4,14 @@ import toast from "react-hot-toast";
 export const useAuthStore = create((set) => ({
   authUser: null,
   isCheckingAuth: true,
+  isUpdatingProfile: true,
   checkAuth: async () => {
     await axiosInstance
       .get("/auth/checkAuth", {
         withCredentials: true,
       })
       .then((res) => {
-        set({ authUser: res.data });
+        set({ authUser: res.data.data });
       })
       .catch((err) => {
         console.log(`Respone ${err}`);
@@ -32,6 +33,11 @@ export const useAuthStore = create((set) => ({
         toast.success("User is Logged.");
       });
   },
+  login: async (formData) => {
+    await axiosInstance.post("auth/login", formData, {
+      withCredentials: true, // Important for cookies to be sent
+    });
+  },
   logout: async () => {
     await axiosInstance.post("/auth/logout", null, {
       headers: {
@@ -42,4 +48,15 @@ export const useAuthStore = create((set) => ({
     set({ authUser: null });
     toast.success("User is Logged Out");
   },
+  updateProfile: async (formData) => {
+    const response = await axiosInstance.put(
+      "/auth/updateProfilePic",
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    set({ authUser: response.data });
+  },
+  getProfile: async () => {},
 }));

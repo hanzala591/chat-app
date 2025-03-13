@@ -10,8 +10,10 @@ import Setting from "./pages/Setting";
 import { useAuthStore } from "./store/useAuthStore";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import { useThemeStore } from "./store/useThemeStore";
 function App() {
   const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
+  const { theme } = useThemeStore();
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -23,17 +25,26 @@ function App() {
     );
   }
   return (
-    <div className="flex h-screen flex-col">
+    <div className="" data-theme={theme}>
       <Navbar></Navbar>
-      <div className="flex-grow">
+      <div>
         <Routes>
-          <Route path="/" element={<Home></Home>} />
-          <Route path="/login" element={<Login></Login>} />
+          <Route
+            path="/"
+            element={authUser ? <Home></Home> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
+            element={!authUser ? <Login></Login> : <Navigate to="/" />}
+          />
           <Route
             path="/signup"
             element={!authUser ? <Signup></Signup> : <Navigate to="/" />}
           />
-          <Route path="/profile" element={<Profile></Profile>} />
+          <Route
+            path="/profile"
+            element={authUser ? <Profile></Profile> : <Navigate to="/login" />}
+          />
           <Route path="/setting" element={<Setting></Setting>} />
         </Routes>
       </div>

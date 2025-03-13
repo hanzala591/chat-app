@@ -1,7 +1,10 @@
 import ApiError from "../lib/ApiError.js";
 import ApiResponse from "../lib/ApiResponse.js";
 import asyncHandler from "../lib/asyncHandler.js";
-import { uploadFileOnCloudinary } from "../lib/cloudinary.js";
+import {
+  deleteFileOnCloudinary,
+  uploadFileOnCloudinary,
+} from "../lib/cloudinary.js";
 import { generateToken } from "../lib/Tokens.js";
 import fs from "fs";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -31,7 +34,9 @@ export const signup = asyncHandler(async (req, res) => {
     email,
     fullName,
     password: cryptedPassword,
-    profilePic: uploadedCloudinary?.secure_url,
+    profilePic:
+      uploadedCloudinary?.secure_url ||
+      "https://res.cloudinary.com/do1x1erel/image/upload/v1741814945/avatar_eildmk.png",
   });
 
   if (!user) {
@@ -76,32 +81,31 @@ export const login = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, token));
 });
 export const logout = asyncHandler((req, res) => {
-  console.log("click");
   return res
     .status(200)
     .clearCookie("auth")
     .json(new ApiResponse(200, req.user));
 });
 
-export const cookieee = asyncHandler(async (req, res) => {
-  await res.cookie("done", "dne");
-  return res.send("done");
-});
-
 export const checkAuth = asyncHandler(async (req, res) => {
   if (!req.user) {
     return res.status(400).json(new ApiError(400, "User is not Authenticated"));
-    // throw new ApiError(400, "User is not Authenticated");
   }
-  return res.status(200).json(new ApiResponse(200, req.user));
+  const user = await User.findOne({ email: req.user.email }).select(
+    "-password"
+  );
+  return res.status(200).json(new ApiResponse(200, user));
 });
+
 export const updateProfilePic = asyncHandler(async (req, res) => {
   try {
-    const user = req.user;
-    const uploadedCloudinary = await uploadFileOnCloudinary(req.file.path);
+    const user = req?.user;
+    const uploadedCloudinary = await uploadFileOnCloudinary(req?.file?.path);
     if (!uploadedCloudinary) {
       throw new ApiError(500, "Image is not Uploaded");
     }
+    const oldUser = await User.findOne({ email: user.email });
+    await deleteFileOnCloudinary(oldUser.profilePic);
     const updatedUser = await User.findOneAndUpdate(
       { email: user.email },
       {
@@ -111,6 +115,8 @@ export const updateProfilePic = asyncHandler(async (req, res) => {
       },
       { new: true }
     ).select("-password");
+    console.log(updatedUser.profilePic);
+
     fs.unlinkSync(req.file.path);
     return res.status(200).json(new ApiResponse(200, updatedUser));
   } catch (error) {

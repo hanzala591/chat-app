@@ -1,2 +1,10 @@
 @import "tailwindcss";
 @plugin "daisyui";
+@tailwind utilities;
+
+/* @layer base {
+  @import "daisyui/themes.css";
+} */
+@plugin "daisyui" {
+  themes: all;
+}

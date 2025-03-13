@@ -5,6 +5,7 @@ import connectionDB from "./lib/connectionDB.js";
 import cookieParser from "cookie-parser";
 import messageRoute from "./routes/message.route.js";
 import cors from "cors";
+import userRoute from "./routes/user.route.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use(cookieParser());
 app.use(express.static("public"));
 app.use("/api/auth", authRouter);
 app.use("/api/message", messageRoute);
+app.use("/api/user", userRoute);
 connectionDB().then(() => {
   console.log("MongoDb is Connected");
   app.listen(process.env.PORT || 8000, () => {
