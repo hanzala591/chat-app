@@ -34,7 +34,7 @@ export const useAuthStore = create((set) => ({
       });
   },
   login: async (formData) => {
-    await axiosInstance.post("auth/login", formData, {
+    await axiosInstance.post("/auth/login", formData, {
       withCredentials: true, // Important for cookies to be sent
     });
   },

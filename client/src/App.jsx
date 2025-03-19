@@ -25,29 +25,30 @@ function App() {
     );
   }
   return (
-    <div className="" data-theme={theme}>
+    <div
+      className="h-screen flex flex-col bg-base-100 overflow-y-hidden"
+      data-theme={theme}
+    >
       <Navbar></Navbar>
-      <div>
-        <Routes>
-          <Route
-            path="/"
-            element={authUser ? <Home></Home> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/login"
-            element={!authUser ? <Login></Login> : <Navigate to="/" />}
-          />
-          <Route
-            path="/signup"
-            element={!authUser ? <Signup></Signup> : <Navigate to="/" />}
-          />
-          <Route
-            path="/profile"
-            element={authUser ? <Profile></Profile> : <Navigate to="/login" />}
-          />
-          <Route path="/setting" element={<Setting></Setting>} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route
+          path="/"
+          element={authUser ? <Home></Home> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/login"
+          element={!authUser ? <Login></Login> : <Navigate to="/" />}
+        />
+        <Route
+          path="/signup"
+          element={!authUser ? <Signup></Signup> : <Navigate to="/" />}
+        />
+        <Route
+          path="/profile"
+          element={authUser ? <Profile></Profile> : <Navigate to="/login" />}
+        />
+        <Route path="/setting" element={<Setting></Setting>} />
+      </Routes>
       <Toaster />
     </div>
   );

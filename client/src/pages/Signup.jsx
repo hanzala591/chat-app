@@ -39,7 +39,7 @@ export default function Signup() {
     }
   };
   return (
-    <div className="h-full grid lg:grid-cols-2 ">
+    <div className="grid lg:grid-cols-2 overflow-y-scroll">
       {/* Left Side */}
       <div className=" flex  justify-center items-center p-4 sm:p-8 ">
         <div className="w-full max-w-md space-y-8">

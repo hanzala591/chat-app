@@ -19,7 +19,7 @@ export default function Login() {
     toast.success("User is Successfully Logged.");
   };
   return (
-    <div className="h-full grid lg:grid-cols-2 ">
+    <div className=" grid lg:grid-cols-2 overflow-y-scroll">
       {/* Left Side */}
       <div className=" flex h-full justify-center items-center p-4 sm:p-8 ">
         <div className="w-full h-full max-w-md space-y-8">

@@ -14,7 +14,6 @@ export default function Navbar() {
       setSelectedImage(fileReader.result);
     };
     const formData = new FormData();
-    console.log(typeof file);
     formData.append("profilePic", file);
     await updateProfile(formData);
   };

@@ -4,7 +4,7 @@ import ApiError from "../lib/ApiError.js";
 import { uploadFileOnCloudinary } from "../lib/cloudinary.js";
 import fs from "fs";
 export const getChatting = asyncHandler(async (req, res) => {
-  const { email: receiverId } = req.params;
+  const { id: receiverId } = req.params;
   const senderId = req.user._id;
   const messages = await Message.find({
     $or: [
@@ -12,14 +12,13 @@ export const getChatting = asyncHandler(async (req, res) => {
       { sender: receiverId, receiver: senderId },
     ],
   });
-  return res.send(messages);
+  return res.status(200).json(messages);
 });
 export const sendMessage = asyncHandler(async (req, res) => {
   const { _id: senderId } = req.user;
   const { id: receiverId } = req.params;
   const { text } = req.body;
   const image = req.file;
-
   if (!text && !image) {
     throw new ApiError(500, "Please Enter Text or Attach Image");
   }
@@ -32,8 +31,9 @@ export const sendMessage = asyncHandler(async (req, res) => {
     sender: senderId,
     receiver: receiverId,
     text: text,
-    image: uploadedCloudinary.secure_url,
+    image: uploadedCloudinary?.secure_url || null,
   });
+
   if (!message) {
     throw new ApiError(500, "Message is not created.");
   }
