@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { ImagePlus, Send, SendHorizonal } from "lucide-react";
 
 export default function ChatSelected() {
-  const { selectedUser, sendMessage, messages } = useChatStore();
+  const { selectedUser, sendMessage, messages, receivedMessage, onlineUser } =
+    useChatStore();
   const [message, setMessage] = useState("");
   const [image, setImage] = useState();
+  const scrollChatRef = useRef();
   useEffect(() => {
     setImage(null);
     setMessage("");
   }, [selectedUser]);
-  const PREVIEW_MESSAGES = [
-    { id: 1, content: "Hey! How's it going?", isSent: false },
-    {
-      id: 2,
-      content: "I'm doing great! Just working on some new features.",
-      isSent: true,
-    },
-  ];
+
+  useEffect(() => {
+    receivedMessage();
+  }, []);
+
   return (
     <div className="h-full flex flex-col">
       <div>
         <div className="flex pl-5 items-center">
           <div className="overflow-hidden rounded-full">
+            {console.log(selectedUser)}
             <img
               src={selectedUser?.profilePic || "/avatar.png"}
               alt=""
@@ -33,16 +33,21 @@ export default function ChatSelected() {
             <p>{`${selectedUser.fullName
               .charAt(0)
               .toUpperCase()}${selectedUser.fullName.slice(1)}`}</p>
-            <p>Offline</p>
+            <p>
+              {onlineUser.includes(selectedUser._id) ? "Online" : "Offline"}
+            </p>
           </div>
         </div>
       </div>
       <div className="bg-base-300 rounded-xl ml-5 flex-grow">
-        <div className="px-3 py-3 rounded-xl shadow-sm overflow-hidden">
+        <div
+          className="px-3 py-3 rounded-xl  overflow-hidden "
+          ref={scrollChatRef}
+        >
           {/* Chat Messages */}
-          {messages.map((message) => (
+          {messages.map((message, id) => (
             <div
-              key={message._id}
+              key={id}
               className={`flex py-2 ${
                 message.receiver === selectedUser._id
                   ? "justify-end"
@@ -59,7 +64,10 @@ export default function ChatSelected() {
                           }
                         `}
               >
-                <p className="text-sm">{message.text}</p>
+                {message?.text && <p className="text-sm">{message.text}</p>}
+                {message?.image && (
+                  <img className="size-30" src={message.image} />
+                )}
                 <p
                   className={`
                             text-[10px] mt-1.5

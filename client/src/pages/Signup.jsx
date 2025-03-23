@@ -35,7 +35,6 @@ export default function Signup() {
     const validate = validateForm();
     if (validate) {
       await signup(formData);
-      checkAuth();
     }
   };
   return (

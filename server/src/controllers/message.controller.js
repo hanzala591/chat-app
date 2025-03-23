@@ -3,6 +3,7 @@ import Message from "../models/message.model.js";
 import ApiError from "../lib/ApiError.js";
 import { uploadFileOnCloudinary } from "../lib/cloudinary.js";
 import fs from "fs";
+import { getSocketFromUserId, io } from "../lib/socket.js";
 export const getChatting = asyncHandler(async (req, res) => {
   const { id: receiverId } = req.params;
   const senderId = req.user._id;
@@ -36,6 +37,17 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   if (!message) {
     throw new ApiError(500, "Message is not created.");
+  }
+  const socketId = getSocketFromUserId(receiverId);
+  if (socketId) {
+    const newMessage = {};
+    if (text) {
+      newMessage.text = message.text;
+    }
+    if (image) {
+      newMessage.image = message.image;
+    }
+    io.to(socketId).emit("newMessage", newMessage);
   }
   return res.status(200).json(message);
 });

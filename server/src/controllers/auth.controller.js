@@ -34,9 +34,7 @@ export const signup = asyncHandler(async (req, res) => {
     email,
     fullName,
     password: cryptedPassword,
-    profilePic:
-      uploadedCloudinary?.secure_url ||
-      "https://res.cloudinary.com/do1x1erel/image/upload/v1741814945/avatar_eildmk.png",
+    profilePic: uploadedCloudinary?.secure_url || null,
   });
 
   if (!user) {

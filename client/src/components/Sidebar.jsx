@@ -1,12 +1,19 @@
 import React, { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Users } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function Sidebar() {
-  const { users, getAllUsers, selectUser } = useChatStore();
+  const { users, getAllUsers, selectUser, onlineUser, onlineUsers } =
+    useChatStore();
+  const { socket } = useAuthStore();
   useEffect(() => {
     getAllUsers();
   }, [getAllUsers]);
+  useEffect(() => {
+    onlineUsers();
+  }, []);
+
   return (
     <div className="ml-7  ">
       <div className="flex gap-3 border-b-4  border-base-100 py-3">
@@ -33,6 +40,7 @@ export default function Sidebar() {
               <p className="font-medium">{`${v.fullName
                 .charAt(0)
                 .toUpperCase()}${v.fullName.slice(1)}`}</p>
+              <p>{onlineUser.includes(v._id) ? "Online" : "Offline"}</p>
             </div>
           </div>
         ))}

@@ -15,7 +15,6 @@ export default function Login() {
   const handleForm = async (e) => {
     e.preventDefault();
     await login(formData);
-    await checkAuth();
     toast.success("User is Successfully Logged.");
   };
   return (

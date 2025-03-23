@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "../axios/axios";
+import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
   users: [],
@@ -7,6 +8,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isLoadingUser: false,
   isLoadingChat: false,
+  onlineUser: [],
 
   getAllUsers: async () => {
     const res = await axiosInstance.get("/user/getAllUsers", {
@@ -14,12 +16,15 @@ export const useChatStore = create((set, get) => ({
     });
     set({ users: res.data.data });
   },
-  selectUser: async (user) => {
-    set({ selectedUser: user });
-    const res = await axiosInstance.get(`/message/getChatting/${user._id}`, {
+  getAllChatSelectedUser: async (user) => {
+    const res = await axiosInstance.get(`/message/getChatting/${user?._id}`, {
       withCredentials: true,
     });
     set({ messages: res.data });
+  },
+  selectUser: async (user) => {
+    set({ selectedUser: user });
+    get().getAllChatSelectedUser(user);
   },
   sendMessage: async (formData) => {
     const res = await axiosInstance.post(
@@ -32,5 +37,20 @@ export const useChatStore = create((set, get) => ({
         withCredentials: true,
       }
     );
+    if (res) {
+      set({ messages: [...get().messages, res.data] });
+    }
+  },
+  receivedMessage: () => {
+    const socket = useAuthStore.getState().socket;
+    socket.on("newMessage", (newMessage) => {
+      set({ messages: [...get().messages, newMessage] });
+    });
+  },
+  onlineUsers: () => {
+    const socket = useAuthStore.getState().socket;
+    socket.on("OnlineUsers", (onlineuser) => {
+      set({ onlineUser: onlineuser });
+    });
   },
 }));
